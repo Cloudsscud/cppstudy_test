@@ -1,0 +1,65 @@
+#include<iostream>
+using namespace std;
+
+//检测数组缺少的数，并返回该数
+//int Check_num(const int* arr,int Numsize)
+//{
+//	int ret = 0;
+//	for (int i = 0; i < Numsize; i++)
+//	{
+//		ret ^= arr[i];
+//	}
+//	for (int i = 1; i < Numsize + 1; i++)
+//	{
+//		ret ^= i;
+//	}
+//	return ret;
+//}
+//int main()
+//{
+//	int nums[10] = {1,3,4,6,2,8,7,5,10};//10个数字的数组但缺少一个数字
+//
+//	int ret = Check_num(nums, 10);
+//	cout << "缺少的数字为" << ret << endl;
+//	return 0;
+//}
+
+////引用
+//int main()
+//{
+//	//int a = 10;
+//	//int& ra = a;//ra是a的别名，ra和a共用一块空间
+//	//ra = 2;
+//	//cout << ra << a << endl;
+//
+//	//int& sa = ra;//sa是ra的别名，也是a的别名
+//	//sa = 3;
+//	//cout << sa << ra << endl;
+//
+//	//const int b = 10;
+//	//const int& rb = b;
+//	//cout << rb << b << endl;
+//
+//	//const int da = a;
+//	//a = 4;
+//	//cout << ra << a << da << endl;
+//	////别名的读写权限只能缩小
+//
+//	int num1 = 10;
+//	double num2 = num1; //隐式类型转换
+//	//double& nnum1 = num1;//error  隐式类型转换
+//
+//	//const 限定后才可以 (?) 
+//	//在进行隐式类型转换时原类型变量num1会生成一个类型转换后的临时变量，
+//	// 并且该临时变量具有常性(const限定)(程序为了保护这个临时变量不被修改)
+//	//而目标类型变量nnum1实际上是对这个临时变量的使用，
+//	// 但因为读写权限只能缩小或不变，所以nnum1必须是只读的(const限定)
+//	const double nnum1 = num1;
+//	
+//	//double& nnum2 = num1;//error 
+//	const double& nnum2 = num1;//nnum2是对临时变量的引用，不可修改
+//
+//	num1 = 30;
+//	cout << num1 << endl << nnum1 <<endl << nnum2 << endl;
+//	return 0;
+//}
