@@ -1,0 +1,92 @@
+//int main()
+//{
+//	/*
+//	//auto会自动判别对象的类型
+//	int a = 10;
+//	auto b = a;
+//	auto& c = a;
+//	auto* d = &a;
+//	auto e = &a;
+//
+//	cout << typeid(a).name() << endl;
+//	cout << typeid(b).name() << endl;
+//	cout << typeid(c).name() << endl;
+//	cout << typeid(d).name() << endl;
+//	cout << typeid(e).name() << endl;
+//	*/
+//
+//	//auto可以遍历数组,(有点像python中for i in array)
+//	int array[5] = { 1,2,3,4,5 };
+//
+//	for (auto num : array)	//通过num遍历array的每一个元素，但此处实际上是array中的每一个元素赋值给num
+//	{						//所以不论num怎么改变，都不会影响到array中的元素值
+//		num *= 2;
+//	}
+//	
+//	for (auto num : array)
+//	{
+//		cout << num << " ";
+//	}
+//	cout << endl;
+//
+//	//可以通过别名来改变array中的值
+//	for (auto& num : array)	
+//	{
+//		num *= 2;
+//	}
+//
+//	for (auto num : array)
+//	{
+//		cout << num << " ";
+//	}
+//	cout << endl;
+//
+//	//注意：在函数传参时，不能对形参中的数组进行auto遍历
+//	//（传参时实际只传了数组首元素地址，不再是一个数组了，所以不能auto遍历）
+//	return 0;
+//}
+
+//类
+class Student
+{
+	void Test()//class关键字创建类，成员默认为私有的
+	{
+		cout << "class: default" << endl;
+	}
+public:
+	void ShowInfo(void)
+	{
+		cout << _name << endl;
+		cout << _age << endl;
+		cout << _stuid << endl;
+	}
+private:		//一般默认让类的成员变量为私有的
+	char* _name;
+	int _age;
+	int _stuid;
+};
+
+struct Person
+{
+	void test()//struct关键字创建类，成员默认为公有的
+	{
+		cout << "struct:default" << endl;
+	}
+public:
+	void ShowName()
+	{
+		cout << _name << endl;
+	}
+private:
+	char* _name;
+};
+int main()
+{
+	Student s1;
+	Person s2;
+
+	//s1.test();//error		//class关键字创建类，成员默认为私有的
+
+	s2.test();	//struct关键字创建类，成员默认为公有的
+	return 0;
+}
