@@ -90,3 +90,140 @@ int main()
 	s2.test();	//struct关键字创建类，成员默认为公有的
 	return 0;
 }
+
+
+//类
+class Student
+{
+	void Test()//class关键字创建类，成员默认为私有的
+	{
+		cout << "class: default" << endl;
+	}
+public:
+	void ShowInfo(void)
+	{
+		cout << _name << endl;
+		cout << _age << endl;
+		cout << _stuid << endl;
+	}
+private:		//一般默认让类的成员变量为私有的
+	char* _name;
+	int _age;
+	int _stuid;
+};
+
+struct Person
+{
+	void test()//struct关键字创建类，成员默认为公有的
+	{
+		cout << "struct:default" << endl;
+	}
+public:
+	void ShowName()
+	{
+		cout << _name << endl;
+	}
+private:
+	char* _name;
+};
+int main()
+{
+	Student s1;
+	Person s2;
+
+	//s1.test();//error		//class关键字创建类，成员默认为私有的
+
+	s2.test();	//struct关键字创建类，成员默认为公有的
+	return 0;
+}
+
+class Stack
+{
+public:
+	void Init()//类内直接定义
+	{
+		//...
+	}
+	void Push(int x);//类内声明，类外定义
+
+	//void Pop(int x);
+	bool Empty()
+	{
+		//...
+	}
+private:
+	int* _a;
+	int _top;
+	int _capicity;
+};
+
+//类外定义
+void Stack::Push(int x)
+{
+	//...
+}
+
+int main()
+{
+	Stack s1;
+	Stack s2;
+	Stack s3;
+
+	s1.Init();
+	s1.Push(10);
+	cout << sizeof(s2) << endl;
+
+	return 0;
+}
+
+class Date
+{
+public:
+	void Init(int year, int month, int day)
+	{
+		_year = year;	//为什么能用private内的成员变量呢？
+		_month = month;	//c++在类的函数调用时编译器会自动增加一个this指针（类* this）指向这个类
+		_day = day;		//这个this指针我们也可以使用，但不能显式声明
+	}					//this指针是形参，存在于栈中 (但有些编译器优化后存在于其他地方)
+	void Print()
+	{
+		cout << _year << "-" << _month << "-" << _day << endl;
+	}
+private:
+	int _year;
+	int _month;
+	int _day;
+};
+
+int main()
+{
+	Date i;
+	i.Init(2024, 10, 26);
+	i.Print();
+	return 0;
+}
+
+class test
+{
+public:
+	void Print1()
+	{
+		cout << _x << endl;
+	}
+	void Print2()
+	{
+		cout << "test" << endl;
+	}
+private:
+	int _x;
+};
+int main()
+{
+	test* p = NULL;
+	p->Print1();	//程序崩了，对空指针的解引用(越界访问)
+	p->Print2();	//正常运行，实际上并没有使用空指针p
+	//因为成员函数存在公共代码段，p->Print2 没有去寻找p实际指向的对象
+	//只有在访问成员变量时才会去找p实际指向的对象,而p->Print1就去寻找p指向的对象了，造成越界访问
+	
+	return 0;
+}
