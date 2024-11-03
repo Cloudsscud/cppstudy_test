@@ -1,0 +1,254 @@
+//构造函数
+//特点：函数名与类名相同，无返回值，对象实例化时自动调用，构造函数可以重载
+//如果有显式定义构造函数，则编译器不会生成默认无参的构造函数；若无显式构造函数，则编译器生成默认无参构造函数
+//默认无参构造函数，对于内置类型成员变量不做处理；但对自定义类型成员变量，会调用这个类型的构造函数进行初始化
+
+class Time
+{
+public:
+	Time()
+	{
+		_hour = 0;
+		_minute = 0;
+		_second = 0;
+
+		cout << "Time()" << endl;
+	}
+private:
+	int _hour;
+	int _minute;
+	int _second;
+};
+
+class Date
+{
+public:
+	//Date(int year, int month, int day)	//构造函数：在对象构造时调用，完成初始化工作
+	//{										//但是此时没有了默认构造函数
+	//	_year = year;					
+	//	_month = month;
+	//	_day = day;
+	//}
+	//Date()//所以需要来一个函数重载，来完成单纯的声明任务
+	//{
+	//	_year = 0;					
+	//	_month = 1;
+	//	_day = 1;
+	// }
+	void Print()
+	{
+		cout << _year << "-" << _month << "-" << _day << endl;
+	}
+private:
+	//内置类型
+	int _year;
+	int _month;
+	int _day;
+
+	//自定义类型
+				//在一个(无显式构造函数)的类中，有(含显式构造函数)类的成员变量
+	Time _t;	//可以发现这个这个(无显式构造函数)类在实例化时，调用的是默认构造函数
+};				//而(含显式构造函数)类成员变量却在实例化时，调用了其自身的构造函数
+
+
+class test
+{
+public:
+	test(int t1 = 0, int t2 = 1, int t3 = 1)//可以用全缺省构造函数来优化上边Date的那两个构造函数
+	{										//注意!：全缺省构造函数不能与我们构造的无参构造函数共存(同属默认构造函数)
+		_t1 = t1;				//默认构造函数有三类：全缺省构造函数、我们构造的无参构造函数、编译器默认生成的无参构造函数
+		_t2 = t2;				//	均不用传递参数
+		_t3 = t3;
+	}
+private:
+	int _t1;
+	int _t2;
+	int _t3;
+};
+
+int main()
+{
+	//Date t1;	//无参数函数构造时不能加(),否则就成了函数声明了
+	//t1.Print();
+
+	//Date t2(2024, 10, 27);
+	//t2.Print();
+
+	Date t1;
+	return 0;
+}
+
+//析构函数: 在类对象生命周期结束时自动调用，若无显式定义，则编译器默认生成
+// 做清理工作(如free、fclose...)，而不是销毁
+class Stack
+{
+public:
+	Stack(int n = 10)	//构造函数
+	{
+		_a = (int*)malloc(sizeof(Stack) * n);
+		cout << "malloc:" << _a << endl;
+		_top = 0;
+		_capacity = n;
+	}
+
+	//...
+
+	~Stack()	//析构函数  有且只有一个  析构是栈结构运行的
+	{
+		if(_a)
+		{
+			free(_a);
+			cout << "free:" << _a << endl;
+			_a = nullptr;
+			_top = _capacity = 0;
+		}
+	}
+private:
+	int* _a;
+	int _top;
+	int _capacity;
+};
+
+int main()
+{
+	Stack s1;
+	Stack s2;
+	return 0;
+}
+
+//拷贝构造
+class Date
+{
+public:
+	Date(int year = 0, int month = 1, int day = 1)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+
+	/*Date(Date d)
+	{
+		_year = d._year;
+		_month = d._month;
+		_day = d._day;
+	}		*/		//成了一个递归构造（why）我们想要初始化d2时，先调用构造函数，那么需要自定义类型实参d1传给形参d，
+					//那么怎么传呢？相当于使用了Date d(d1)语句，
+					//此时就与开始时的Date d2(d1)相同情况了，便会一次次使用Date d(d1)语句，直至崩溃
+					//形参d可以看作一个无限加价的奸商，看你一直想要(拷贝)但就是不断给你加价(占用内存),让你永远无法买到手
+
+	Date(const Date& d)	//我们可以用一个引用来避免中间商	这就是一个真正的拷贝构造
+	{
+		_year = d._year;
+		_month = d._month;
+		_day = d._day;
+	}
+
+	void Print()
+	{
+		cout << _year << "-" << _month << "-" << _day << endl;
+	}
+
+	bool operator==(Date& d)	//写成成员函数即可，自带一个this指针，可以访问成员变量
+	{
+		return _year == d._year
+			&& _month == d._month
+			&& _day == d._day;
+	}
+
+	bool operator>(Date& d)
+	{
+		if (_year > d._year)
+			return 1;
+		else if (_year == d._year)
+			if (_month > d._month)
+				return 1;
+			else if (_month == d._month)
+				if (_day > d._day)
+					return 1;
+		return 0;
+	}
+private:
+	int _year;
+	int _month;
+	int _day;
+};
+
+//运算符重载
+//自定义类型的对象不能直接使用运算符，所以需要进行运算符重载，这样在使用运算符时就等价于在调用这个函数
+//bool operator==(Date & d1, Date & d2)
+//{
+//	return d1._year == d2._year		//因为我们想要对成员变量进行比较，所以需要这些成员变量是public的
+//		&& d1._month == d2._month	//所以不太合适
+//		&& d1._day == d2._day;
+//}
+
+int main()
+{
+	//Date d1(2024, 10, 27);
+
+	////这两种都是拷贝构造
+	//Date d2(d1);
+	//Date d3 = d1;
+
+	Date d1(2023, 11, 27);
+	Date d2(2024, 10, 28);
+
+	////d1 == d2 =>编译器会转为 operator==(d1,d2);
+	//d1 == d2;//等价
+	//operator==(d1, d2);
+
+	d1 == d2; // 此时等价于d1.operator==(d2);
+	
+	if (d1 > d2)
+	{
+		cout << "d1\n";
+	}
+	else
+		cout << "d2\n";
+	return 0;
+}
+
+//默认拷贝构造、operator=等默认函数的不足
+class Stack
+{
+public:
+	Stack(int n = 10)
+	{
+		_a = (int*)malloc(sizeof(Stack) * n);
+		cout << "malloc:" << _a << endl;
+		_top = 0;
+		_capacity = n;
+	}
+
+	//...
+
+	~Stack()
+	{
+		if (_a)
+		{
+			free(_a);
+			cout << "free:" << _a << endl;
+			_a = nullptr;
+			_top = _capacity = 0;
+		}
+	}
+private:
+	int* _a;
+	int _top;
+	int _capacity;
+};
+
+int main()
+{
+	Stack s1;
+	Stack s2(s1);
+
+	Stack s3(30);
+	s1 = s2;
+	//在使用默认拷贝构造时，由于浅拷贝是一个一个字节拷贝的，
+	//因此对于含有指针的类，使用默认拷贝构造或operator=之后，两对象的指针会指向同一块空间，
+	//进而在析构时出现将同一块空间释放了两次，就导致程序崩溃
+	//这就要用到深拷贝的构造拷贝和operator=
+	return 0;
+}
