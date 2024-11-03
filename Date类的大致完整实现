@@ -1,0 +1,229 @@
+class Date
+{
+public:
+	int GetMonthDay(int year, int month)
+	{
+		static int MonthDay[13] = { 0, 31, 28,31,30,31,30,31,31,30,31,30,31 };
+
+		//闰年的二月天数
+		if (month == 2 && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0))
+		{
+			return 29;
+		}
+
+		return MonthDay[month];
+	}
+	//公元后日期
+	Date(int year = 0, int month = 1, int day = 1)
+	{
+		if (year >= 0 && month >= 1 && month <= 12 && day >= 1 && day <= GetMonthDay(year, month))
+		{
+			_year = year;
+			_month = month;
+			_day = day;
+		}
+		else
+		{
+			cout << "错误日期" << endl;
+		}
+	}
+
+	////拷贝构造(会默认生成)
+	//Date(const Date& d)
+	//{
+	//	_year = d._year;
+	//	_month = d._month;
+	//	_day = d._day;
+	//}
+
+	//operator=也会默认生成，与拷贝构造一样是浅拷贝（按字节一个一个拷贝）
+
+	void Print()
+	{
+		cout << _year << "-" << _month << "-" << _day << endl;
+	}
+
+	// >
+	inline bool operator>(const Date& d)
+	{
+		if (_year > d._year)
+			return true;
+		else if (_year == d._year)
+			if (_month > d._month)
+				return true;
+			else if (_month == d._month)
+				if (_day > d._day)
+					return true;
+		return false;
+	}
+
+	//  ==
+	inline bool operator==(const Date& d)
+	{
+		return _year == d._year && _month == d._month && _day == d._day;
+	}
+	
+	bool operator<(const Date& d)
+	{
+		return !(*this > d || *this == d);
+	}
+
+	bool operator<= (const Date & d)
+	{
+		//两种方法
+		//return !this->operator>(d);
+		return *this < d || *this == d;
+	}
+	
+	bool operator>= (const Date & d)
+	{
+		return !this->operator<(d);
+	}
+	
+	bool operator!= (const Date & d)
+	{
+		return !this->operator==(d);
+	}
+
+	Date operator+(int days)
+	{
+		Date ret(*this);//先拷贝一份
+		ret += days;
+		return ret;
+	}
+
+	Date& operator+=(int days)
+	{
+		if (days < 0)
+		{
+			*this -= -days;
+		}
+		else
+		{
+			_day += days;
+			while (_day > GetMonthDay(_year, _month))
+			{
+				_day -= GetMonthDay(_year, _month);
+				_month++;
+
+				if (_month == 13)
+				{
+					_year++;
+					_month = 1;
+				}
+			}
+		}
+		return *this;
+	}
+
+	Date operator-(int days)
+	{
+		Date ret(*this);
+		ret -= days;
+		return ret;
+	}
+
+	Date& operator-=(int days)
+	{
+		if (days < 0)
+		{
+			*this += -days;
+		}
+		else
+		{
+			_day -= days;
+			while (_day < 1)
+			{
+				_month--;
+				if (_month == 0)
+				{
+					_year--;
+					_month = 12;
+				}
+				_day += GetMonthDay(_year, _month);
+			}
+		}
+		return *this;
+	}
+
+	//++d1 => operator++(&d1)
+	Date& operator++()
+	{
+		return (*this += 1);
+	}
+
+	//d1++ => operator++(&d1, 0)	//0无意义，也可以是其他整数
+	Date operator++(int)//这里的int无实际含义，仅用于区分;只是为了在函数重载中区分前置++与后置++
+	{
+		Date tmp(*this);
+		++*this;
+		return tmp;
+	}
+
+	int operator-(const Date& d)
+	{
+		int flag = 1;
+		Date max(*this), min(d);
+		if (*this < d)
+		{
+			max = d;
+			min = *this;
+			flag = -1;
+		}
+
+		int count = 0;
+		while (min != max)
+		{
+			++min;
+			++count;
+		}
+		return count * flag;
+	}
+
+private:
+	int _year;
+	int _month;
+	int _day;
+};
+int main()
+{
+	Date d1(2024,10,28);
+	d1.Print();
+
+	Date d2(2023, 12, 17);
+	d2.Print();
+
+	//Date d3(2023, 12, 17); 
+	//Date d4(2023, 12, 17);
+	///*d2 = d1;
+	//d2.Print();*/
+
+	//cout << (d1 > d2) << endl;
+
+	//cout << (d1 < d2) << endl;
+	//cout << (d3 < d4) << endl;
+
+	//cout << (d1 == d2) << endl;
+	//cout << (d3 == d4) << endl;
+
+	//cout << (d1 != d2) << endl;
+	//cout << (d1 >= d2) << endl;
+
+	//cout << (d1 <= d2) << endl;
+	//cout << (d3 <= d4) << endl;
+
+	/*Date d = d1 - 365;
+	d.Print();*/
+
+	/*d1 -= -365;
+	d1.Print();
+	d1 += -365;
+	d1.Print();*/
+
+	/*d1++;
+	++d1;*/
+
+	/*cout << d1 - d2 << endl;
+	cout << d2 - d1 << endl;*/
+	return 0;
+}
