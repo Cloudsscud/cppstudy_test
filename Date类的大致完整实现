@@ -1,7 +1,9 @@
+//注意！！：	只要成员函数没有改变成员变量，那就要给this指针加上const
+//			这样const对象和非const对象都可调用
 class Date
 {
 public:
-	int GetMonthDay(int year, int month)
+	int GetMonthDay(int year, int month) const
 	{
 		static int MonthDay[13] = { 0, 31, 28,31,30,31,30,31,31,30,31,30,31 };
 
@@ -38,13 +40,13 @@ public:
 
 	//operator=也会默认生成，与拷贝构造一样是浅拷贝（按字节一个一个拷贝）
 
-	void Print()
+	void Print()const
 	{
 		cout << _year << "-" << _month << "-" << _day << endl;
 	}
 
 	// >
-	inline bool operator>(const Date& d)
+	inline bool operator>(const Date& d)const
 	{
 		if (_year > d._year)
 			return true;
@@ -58,34 +60,34 @@ public:
 	}
 
 	//  ==
-	inline bool operator==(const Date& d)
+	inline bool operator==(const Date& d)const
 	{
 		return _year == d._year && _month == d._month && _day == d._day;
 	}
 	
-	bool operator<(const Date& d)
+	bool operator<(const Date& d)const
 	{
 		return !(*this > d || *this == d);
 	}
 
-	bool operator<= (const Date & d)
+	bool operator<= (const Date & d)const
 	{
 		//两种方法
 		//return !this->operator>(d);
 		return *this < d || *this == d;
 	}
 	
-	bool operator>= (const Date & d)
+	bool operator>= (const Date & d)const
 	{
 		return !this->operator<(d);
 	}
 	
-	bool operator!= (const Date & d)
+	bool operator!= (const Date & d)const
 	{
 		return !this->operator==(d);
 	}
 
-	Date operator+(int days)
+	Date operator+(int days)const
 	{
 		Date ret(*this);//先拷贝一份
 		ret += days;
@@ -116,7 +118,7 @@ public:
 		return *this;
 	}
 
-	Date operator-(int days)
+	Date operator-(int days)const
 	{
 		Date ret(*this);
 		ret -= days;
@@ -160,7 +162,7 @@ public:
 		return tmp;
 	}
 
-	int operator-(const Date& d)
+	int operator-(const Date& d)const
 	{
 		int flag = 1;
 		Date max(*this), min(d);
@@ -185,6 +187,13 @@ private:
 	int _month;
 	int _day;
 };
+
+void F(const Date& d1, const Date& d2)//两个const对象调用成员函数，那成员函数的this指针必须用const限定
+{
+	cout << d1 - d2 << endl;
+	cout << (d1 < d2) << endl;
+}
+
 int main()
 {
 	Date d1(2024,10,28);
