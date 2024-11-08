@@ -1,0 +1,370 @@
+#include<iostream>
+using namespace std;
+//class Date
+//{
+//public:
+//	//explicit Date(int year = 0, int month = 1, int day = 1)
+//	//使用explicit关键字后Date类型的构建时就不允许隐式类型转换(Date d1 = 1就不被允许)
+//	Date(int year = 0, int month = 1, int day = 1)
+//		:_year(year)
+//		, _month(month)
+//		, _day(day)
+//	{
+//		//类初始化列表
+//	}
+//
+//private:
+//	int _year;
+//	int _month;
+//	int _day;
+//};
+//
+//class Test
+//{
+//public:
+//	Test(Date d, int ref)//初始化列表可以看作对象(如t1)的成员变量定义的地方
+//		:_d(d)			//   vvv
+//		,_ref(ref)		//注意！！：这里初始化的顺序与声明顺序一致，与此处先后无关
+//		,_s(10)			//   ^^^
+//	{
+//		_c = 'n';//内置类型可以不在初始化列表处赋值
+//	}
+//private:
+//	//此处为成员变量的声明
+//	Date _d;//这三种类型（自定义类型、引用、const限定）必须在初始化时赋值
+//	int& _ref;
+//	const int _s;
+//
+//	//内置类型
+//	char _c;
+//};
+//
+//class A
+//{
+//public:
+//	A()
+//	{
+//		n++;
+//	}
+//	A(Date& a)
+//	{
+//		n++;
+//	}
+//
+//	static int GetN()//static修饰的成员函数，不含this指针，所以不能访问类的成员变量，只能访问静态变量
+//	{
+//		return n;
+//		//cout << _val << endl; //error
+//	}
+//
+//	void f1()//类内非static成员函数可以调用static函数
+//	{		
+//		f2();//=>this->f2() //突破类域(在类外访问类内成员)+访问限定符即可访问
+//	}						//类的内部是一个整体，都属于类域，访问限定符不影响类内部的访问(成员函数访问)
+//
+//	static void f2()//类内static函数 不能调用非static成员函数
+//	{				//原因是无this指针
+//		//f1();
+//	}
+//
+//private:
+//	int _val;
+//	static int n;//n用来记录创建了多少个A类的对象(构造和拷贝构造都创建了对象)
+//				//用static，那么n就属于这个类的所有对象(但是对象中并没有存储n)，且属于这个类
+//				//但是n存到了数据段/静态区，在程序开始时就存在了
+//};				//因此实现了数据的封装
+//
+//int A::n = 0;//定义
+//
+//int main()
+//{
+//	//Date d1;
+//	//int test = 10;
+//	//Test t1(d1,test);//对象的定义
+//
+//	//Date d1(1);//构造
+//	//Date d2 = 1;//构造  但是隐含一个单参数的隐式类型转换：构造一个临时变量Date tmp(1) + Date d2 = tmp || 优化为Date d2(1);
+//	//Date d3 = d1;//拷贝构造
+//
+//	//c++11允许多参数隐式类型转换
+//	//Date d4 = { 1,2,3 };
+//
+//	A a1;
+//	A a2;
+//	cout << a1.GetN() << endl;
+//	cout << a2.GetN() << endl;
+//	cout << A::GetN() << endl;
+//	//public时才可以访问
+//	//cout << A::n << endl;
+//
+//	a1.f1();
+//	A::f2();
+//
+//	return 0;
+//}
+
+////1+2+3+...+n
+//class Sum
+//{
+//public:
+//	Sum()
+//	{
+//		_sum += _i++;
+//	}
+//	static int GetSum()
+//	{
+//		return _sum;
+//	}
+//	static void RetSet()
+//	{
+//		_sum = 0;
+//		_i = 1;
+//	}
+//private:
+//	static int _i;
+//	static int _sum;
+//};
+//
+//int Sum::_i = 1;
+//int Sum::_sum = 0;//需要在声明之后定义
+//
+//class Solution
+//{
+//public:
+//	int AddSum(int n)const
+//	{
+//		//Sum a[n];//c++不支持变长数组
+//		Sum::RetSet();//每次计算前重置计数
+//		Sum* ps = new Sum[n];
+//		delete[] ps;
+//		return Sum::GetSum();
+//	}
+//};
+//
+//int main()
+//{
+//	Solution s;
+//	cout << s.AddSum(5) << endl;//1+2+3+4+5=15
+//	cout << s.AddSum(3) << endl;//1+2+3=6
+//	return 0;
+//}
+
+//class Date
+//{
+//public:
+//	friend void f1(Date& d);//友元函数：让类外函数访问类内成员变量
+//							//用friend关键字声明那个类外函数
+//	void Print()const
+//	{
+//		cout << _year << "-" << _month << "-" << _day << endl;
+//	}
+//
+//	//void operator<<(ostream& out)	//=>operator<<(Date* this, ostream& out),
+//	//								//左操作数为this指针,右操作数才是cout
+//	//{								//所以在使用时是 d1 << cout ,可读性差,所以不能在类内进行<<运算符重载
+//	//	out << _year << "/" << _month << "/" << _day << endl;
+//	//}
+//
+//	friend ostream& operator<<(ostream& out, const Date& d);
+//	friend istream& operator>>(istream& in, Date& d);
+//
+//
+//private://这里是声明时的缺省值,对于静态成员变量不能给缺省值(会产生歧义)
+//	int _year = 0;
+//	int _month = 1;
+//	int _day = 1;
+//
+//	//static int _n = 0;//error
+//};
+//
+////想在类外访问private和protect保护的成员变量,需要使用友元函数
+//void f1(Date& d)
+//{
+//	d._year = 10;//更改
+//	cout << d._year << "/" << d._month << "/" << d._day << endl;
+//}
+//
+//ostream& operator<<(ostream& out, const Date& d)	//void operator<<(ostream& out, const Date& d)//想要连续输出，就需要把返回值修改
+//{													//修改之后不影响后续输出运算符的运用
+//	out << d._year << "/" << d._month << "/" << d._day << endl;
+//	return out;
+//}
+//
+//istream& operator>>(istream& in, Date& d)//要更改，所以只能是Date& d
+//{
+//	in >> d._year >> d._month >> d._day;
+//	return in;//保证连续输入
+//}
+//
+//int main()
+//{
+//	Date d1;
+//	d1.Print();
+//	f1(d1);
+//
+//	//cout << d1; //error
+//	//d1 << cout; //=> d1.operator<<(cout);
+//	//可读性差，所以类内重载是不合适的
+//
+//	//cout << d1;//使用友元函数即可正确实现<<运算符重载
+//
+//	Date d2;
+//	cout << d1 << d2 << (1 && 0) << endl;
+//	cin >> d1 >> d2;
+//	cout << d1 << d2 << endl;
+//
+//	return 0;
+//}
+
+//class A
+//{
+//public:
+//	A(int a = 0)
+//		:_a(a)
+//	{
+//		cout << "A()" << endl;
+//	}
+//
+//	~A()
+//	{
+//		cout << "~A()" << endl;
+//	}
+//private:
+//	int _a;
+//};
+//
+//模板,使用模板可以极大提高复用性
+//template<class T>
+////template<typename T>//两个功能一样
+//void Swap(T& a1, T& a2)
+//{
+//	T a = a1;
+//	a1 = a2;
+//	a2 = a;
+//}
+////注意：模板不会被调用，会在预处理时编译器生成（实际上使用的）相应数据类型的函数（这就是函数模板实例化）
+////所以函数调用时调用的不是模板，也不是同一个函数
+//
+//int main()
+//{
+//	//A* p1 = new A;	//new一个自定义类型，会申请空间 并 调用构造函数
+//	//delete p1;		//delete时会调用析构函数 并 释放空间
+//
+//	//A* p2 = (A*)malloc(sizeof(A));	//malloc只申请空间
+//	//free(p2);						//free只释放空间
+//	////new 与delete更适用于对自定义类型的动态内存分配
+//	////对于内置类型都一样
+//
+//	//A* p1 = new A;
+//	//delete p1;
+//
+//	////模拟操作(显式调用构造函数和析构函数)
+//	//A* p2 = (A*)operator new(sizeof(A));	//先申请一部分空间
+//	////再对这部分空间显式调用构造函数初始化   定位new / placemnet new
+//	//new(p2)A(10);	//new(这部分空间的指针)类型名（想传的参数）
+//
+//	//p2->~A();	//显式调用析构函数
+//	//operator delete(p2);	//释放这部分空间
+//
+//	//size_t n = 2;
+//	//char* p1 = new char[n * 1024 * 1024 * 1024];//2G内存
+//	////没有释放便会出现内存泄漏问题,对于长期运行的程序，一旦内存泄露，程序便会越来越慢
+//
+//
+//	char a = 'a', b = 'b';
+//	//隐式实例化：编译器自动识别模板类型
+//	Swap(a, b);
+//
+//	int c = 10, d = 20;
+//	Swap(c, d);
+//
+//	//显式实例化
+//	Swap<char>(a, b);
+//
+//	return 0;
+//}
+
+
+//#include<assert.h>
+//template<class T>
+////动态增长的数组
+//class vector
+//{
+//public:
+//	vector()
+//		:_a(nullptr)
+//		, _size(0)
+//		, _capacity(0)
+//	{}
+//
+//	~vector()
+//	{
+//		delete[] _a;
+//		_a = nullptr;
+//		_size = _capacity = 0;
+//	}
+//
+//	//若想让外部修改数组内容，就返回引用;否则就返回拷贝
+//	T& operator[](size_t i)
+//	{
+//		assert(i < _size);
+//		return _a[i];
+//	}
+//
+//	size_t size()
+//	{
+//		return _size;
+//	}
+//
+//	void Pushback(const T& x);
+//	void Popback();
+//
+//private:
+//	T* _a;
+//	size_t _size;
+//	size_t _capacity;
+//};
+//
+//template<class T>
+//void vector<T>::Pushback(const T& x)
+//{
+//	//满容
+//	if (_size == _capacity)
+//	{
+//		size_t newcapacity = _capacity == 0 ? 2 : _capacity * 2;
+//		T* tmp = new T[newcapacity];
+//		_capacity = newcapacity;
+//		if(_a)
+//		{
+//			memcpy(tmp, _a, sizeof(T) * _size);
+//			delete[] _a;
+//		}
+//		_a = tmp;
+//	}
+//	_a[_size] = x;
+//	++_size;
+//}
+//
+//template<class T>
+//void vector<T>::Popback()
+//{
+//	assert(_a && _size!= 0);
+//	--_size;
+//}
+//
+//int main()
+//{
+//	vector<int> v;
+//	v.Pushback(1);
+//	v.Pushback(2);
+//	v.Pushback(3);
+//	v.Popback();
+//	v.Pushback(4);
+//
+//	for (int i = 0; i < v.size(); i++)
+//	{
+//		cout << v[i] << " ";
+//	}
+//	cout << endl;
+//	return 0;
+//}
