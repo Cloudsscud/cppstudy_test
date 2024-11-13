@@ -1,0 +1,808 @@
+```
+** test.cpp **
+
+#define _CRT_SECURE_NO_WARNINGS
+#include<iostream>
+#include<string>
+using namespace std;
+
+//string类的部分使用、几种迭代器的使用
+void test1_string()
+{
+	string s1;
+	string s2("Hello World");
+	string s3 = s2;
+	string s4(s2);
+	string s5 = "World";
+
+	string s6(s2, 2, 3);//从下标为2开始拷贝三个字符
+	string s7(s2, 2, string::npos);//从下标为2开始拷贝到结尾，npos(-1)表示size_t类型最大值
+	string s8(3, 'h');
+	string s9(s2, 3);//拷贝前三个字符
+
+}
+
+void test2_string()
+{
+	string s1("Hello");
+	s1 += ' ';
+	s1 += "World";
+	cout << s1 << endl;
+
+	//[]+下标  访问string对象
+	//写  
+	for (size_t i = 0; i < s1.size(); i++)
+	{
+		s1[i] += 1;
+	}
+	//读
+	for (size_t i = 0; i < s1.size(); i++)
+	{
+		cout << s1[i] << " ";
+	}
+	cout << endl;
+
+	//迭代器 
+	string::iterator it = s1.begin();
+	//写
+	while (it != s1.end())
+	{
+		*it -= 1;
+		++it;
+	}
+	it = s1.begin();
+	//读
+	while (it != s1.end())
+	{
+		cout << *it << ' ';
+		++it;
+	}
+	cout << endl;
+
+	//范围for
+	//c++11  原理是用迭代器替换
+	for (auto ch : s1)
+	{
+		cout << ch << " ";
+	}
+	cout << endl;
+}
+
+int string2int(const string& str)
+{
+	int val = 0;
+	//const迭代器  只能读不能写
+	//string::const_iterator cit = str.begin();//const对象调用begin时发生重载，返回一个const迭代器对象
+	auto cit = str.begin();
+	while (cit != str.end())
+	{
+		//*cit += 1;//不能修改
+		val *= 10;
+		val += (*cit - '0');
+		++cit;
+	}
+	return val;
+}
+
+void test3_string()
+{
+	string s1("hello world");
+	//反向迭代器(非const)
+	//string::reverse_iterator rit = s1.rbegin();//rbegin()反向开头
+	auto rit = s1.rbegin();//简便写法
+	while (rit != s1.rend())//rend反向结尾
+	{
+		cout << *rit << " ";
+		++rit;	//反向迭代器也是++
+	}
+	cout << endl;
+
+	string nums("123456");
+	cout << string2int(nums) << endl;
+}
+
+void test4_string()
+{
+	string s1("hello world");
+	string s2("babys");
+	cout << s1.size() << endl;
+	cout << s2.size() << endl;
+
+	cout << s1.length() << endl;
+	cout << s2.length() << endl;
+
+	cout << s1.capacity() << endl;
+	cout << s2.capacity() << endl;
+
+	s1 += "12345";
+	cout << s1.capacity() << endl;
+
+	s1.clear();//清空后size清零但容量不变
+	cout << s1 << endl;
+	cout << s1.size() << endl;
+	cout << s1.capacity() << endl;
+}
+
+void test5_string()
+{
+	string s;
+	size_t sz = s.capacity();
+	for (size_t i = 0; i < 100; ++i)
+	{
+		s.push_back('c');
+		if (sz != s.capacity())
+		{
+			sz = s.capacity();
+			cout << "capacity changed:" << sz << endl;
+		}
+	}
+
+	string s1("Hello world");
+	s.reserve(100);//reserve只改变capacity，不改变size,原有数据也不会改变
+	s.reserve(6);//但如果新容量比原有容量小，则不会改变容量
+	//遵循(16*n-1)一次性分配空间
+
+	string s2("hello world");
+	s2.resize(5);//resize大小小于原来的size时，直接截断
+	s2.resize(16, 'c');//如果超出，则用第二个参数填充
+}
+
+void test6_string()
+{
+	//insert与erase
+	string s1("1");
+	s1 += "3456";
+	cout << s1 << endl;
+	s1.insert(s1.begin(), '0');
+	cout << s1 << endl;
+	s1.insert(2, "2");
+	cout << s1 << endl;
+	//s1.erase(2, 3);
+	s1.erase(2, 10);//最多删到结尾
+	cout << s1 << endl;
+
+}
+
+
+void test7_string()
+{
+	string s("hello world");
+	cout << s << endl;//运算符重载operator<<
+	cout << s.c_str() << endl;//直接输出const char*
+
+	s += '\0';
+	s += "world";
+	cout << s << endl;//全部输出
+	cout << s.c_str() << endl;//遇到'\0'结束
+}
+
+//分离url 协议，域名，资源名称
+void split_url(const string& url)
+{
+	size_t i1 = url.find(':');
+	if (i1 != string::npos)
+	{
+		cout << url.substr(0, i1) << endl;
+	}
+	size_t i2 = url.find('/', i1 + 3);
+	if (i2 != string::npos)
+	{
+		cout << url.substr(i1+3,i2-(i1+3)) << endl;
+	}
+	cout << url.substr(i2 + 1) << endl;
+}
+
+void test8_string()
+{
+	//找后缀名
+	string s1 = "1.c";
+	string s2 = "test.zip";
+	string s3 = ".cpp.zip";
+	size_t pos = s1.find('.');//.find()会从前往后找第一个与参数相同的字符/字符串的位置
+	if (pos != string::npos)//find()未找到会返回npos
+	{
+		cout << s1.substr(pos) << endl;
+	}
+	pos = s2.find('.');
+	if (pos != string::npos)
+	{
+		cout << s2.substr(pos) << endl;
+	}
+	pos = s3.find('.');
+	if (pos != string::npos)
+	{
+		cout << s3.substr(pos) << endl;
+	}
+
+	pos = s3.rfind('.');//rfind()从后往前找
+	if (pos != string::npos)
+	{
+		cout << s3.substr(pos) << endl;
+	}
+
+	string cppurl("https://cplusplus.com/doc/tutorial/");
+	string ltcurl("https://leetcode.cn/");
+	//分离url 协议，域名，资源名称
+	split_url(cppurl);
+	split_url(ltcurl);
+}
+
+void test9_string()
+{
+	string s1;
+	string s2;
+	cin >> s1;//cin 与scanf一样，在输入缓冲区内遇到空白字符时，停止取出字符
+	cout << s1 << endl;
+	getline(cin, s2);//getline从第一个参数中取出字符放入第二个参数中，当遇到第三个参数时舍弃并停止取出字符
+	cout << s2 << endl;		//所以此时输入缓冲区内没有第三个参数的字符
+	getline(cin, s2,'\n'); //这句是读取一行字符(因为分隔符是'\n')并存入s2
+	cout << s2 << endl;
+}
+
+#include "string.h"
+
+int main()
+{
+	//test1_string();
+	//test2_string();
+	//test3_string();
+	//test4_string();
+	//test5_string();
+	//test6_string();
+	//test7_string();
+	//test8_string();
+	//test9_string();
+	
+	//czx::test_string1();
+	//czx::test_string2();
+	
+	//czx::string1_test();
+	//czx::string2_test();
+	czx::string3_test();
+	//czx::string4_test();
+	//czx_1::test();
+
+	string s1("hello ");
+	const string s2("world");
+	s1 = s2;
+	cout << s1 << endl;
+	return 0;
+}
+```
+
+```
+** "string.h" **
+
+#pragma once
+//namespace czx
+//{
+//	class string
+//	{
+//	public:
+//		//string()
+//		//	:_str(nullptr)//不能用空指针，会对野指针进行访问
+//		//{}
+//		string(const char* str = "")//缺省值给一个空字符串(只含一个'\0')
+//			:_str(new char[strlen(str) + 1])//string类存了一个指针，指针指向一个数组，数组末尾一定有一个'\0'
+//		{
+//			strcpy(_str, str);
+//		}
+//		/*string(const char* str)
+//			:_str(str)
+//		{}*/
+//		size_t size()const
+//		{
+//			return strlen(_str);
+//		}
+//
+//		string(const string& str)//深拷贝 构造函数
+//			:_str(new char[strlen(str._str) + 1])
+//		{
+//			strcpy(_str, str._str);
+//		}
+//
+//		char& operator[](size_t i)
+//		{
+//			return _str[i];
+//		}
+//
+//		const char* c_str()const
+//		{
+//			return _str;
+//		}
+//
+//		string& operator=(const string& str)
+//		{
+//			if (this != &str)
+//			{
+//				char* tmp = new char[str.size() + 1];
+//				strcpy(tmp, str._str);
+//				delete[] _str;
+//				_str = tmp;
+//			}
+//			return *this;
+//		}
+//
+//		~string()
+//		{
+//			delete _str;
+//			_str = nullptr;
+//		}
+//	private:
+//		char* _str;
+//
+//	};
+//
+//	void test_string1()
+//	{
+//		string s1("hello");	//字符串常量是只读的，但构造函数时传的是地址，
+//							//那么修改s1的内容时,就对代码段中的只读常量进行写入操作了,错误
+//		string s2;
+//
+//		for (size_t i = 0; i < s1.size(); ++i)
+//		{
+//			s1[i] += 1;
+//			cout << s1[i] << " ";
+//		}
+//		cout << endl;
+//	}
+//
+//	void test_string2()
+//	{
+//		string s1("hello");
+//		string s2(s1);	//还未实现拷贝构造时，使用的时默认拷贝构造，是浅拷贝，对应的是同一块空间
+//						//那么在析构时对同一块空间释放了两次
+//						//所以要用深拷贝构造函数
+//		cout << s1.c_str() << endl;
+//		cout << s2.c_str() << endl;
+//		string s3;
+//		s3 = s1;
+//		cout << s3.c_str() << endl;
+//	}
+//
+//}
+```
+
+```
+#include<assert.h>
+namespace czx
+{
+	typedef char* iterator;
+
+	class string//实现string的增删查改
+	{
+	public:
+		string(const char* str = "")
+		{
+			_size = strlen(str);
+			_capacity = _size + 1;
+			_str = new char[strlen(str) + 1];
+			strcpy(_str, str);
+		}
+
+		string(const string& str)
+			:_str(nullptr)
+			, _size(0)
+			,_capacity(0)
+		{
+			string tmp(str._str);
+			swap(tmp);
+		}
+
+		~string()
+		{
+			delete[] _str;
+			_str = nullptr;
+			_size = _capacity = 0;
+		}
+
+		size_t size()const
+		{
+			return _size;
+		}
+
+		size_t capacity()const
+		{
+			return _capacity;
+		}
+
+		const char* c_str()const
+		{
+			return _str;
+		}
+
+		char& operator[](size_t i)
+		{
+			assert(i < _size);
+			return _str[i];
+		}
+
+		const char& operator[](size_t i)const
+		{
+			assert(i < _size);
+			return _str[i];
+		}
+
+		/*string& operator=(const string& str)
+		{
+			if (this != &str)
+			{
+				char* tmp = new char[str.size() + 1];
+				strcpy(tmp, str._str);
+				delete[] _str;
+				_str = tmp;
+				_size = str._size;
+				_capacity = str._capacity;
+			}
+			return *this;
+		}*/
+
+		string& operator=(string str)//传过来一个拷贝的,结束后自动析构
+		{
+			swap(str);
+			return *this;
+		}
+
+		void swap(string& s)
+		{
+			::swap(_str, s._str);// ::表示swap是全局域的函数，而不是本命名空间的swap
+			::swap(_size, s._size);
+			::swap(_capacity, s._capacity);
+		}
+
+		iterator begin()
+		{
+			return _str;
+		}
+
+		iterator end()
+		{
+			return _str + _size;
+		}
+
+		void reserve(size_t len = 0)
+		{
+			if ((_size + len >= _capacity) || (_size == _capacity))
+			{
+				size_t newcapacity = _capacity == 0 ? (2+len) : (2*_capacity +1 + len);
+				char* newstr = new char[newcapacity + 1];
+				strcpy(newstr, _str);
+				delete[] _str;
+				_str = newstr;
+				_capacity = newcapacity;
+			}
+		}
+
+		void push_back(char ch)
+		{
+			/*reserve(1);
+			_str[_size] = ch;
+			_size++;
+			_str[_size] = '\0';	*/
+			insert(_size, ch);
+		}
+
+		void append(const char* str)
+		{
+			/*reserve(strlen(str));
+			strcpy(_str + _size, str);
+			_size += strlen(str);*/
+			insert(_size, str);
+		}
+		
+		void append(const string& str)
+		{
+			/*reserve(str._size);
+			strcpy(_str + _size, str._str);
+			_size += str._size;*/
+			insert(_size, str._str);
+		}
+
+		string& operator+=(char ch)
+		{
+			this->push_back(ch);
+			return *this;
+		}
+		
+		string& operator+=(const char* str)
+		{
+			this->append(str);
+			return *this;
+		}
+
+		void insert(size_t pos, char ch)
+		{
+			assert(pos <= _size);
+			reserve(1);
+			size_t end = _size;
+			while (end >= pos)//把pos及以后的字符后移一位
+			{
+				_str[end + 1] = _str[end];
+				--end;
+			}
+			_str[pos] = ch;
+			++_size;
+		}
+		
+		string& insert(size_t pos, const char* str)
+		{
+			assert(pos <= _size);
+			size_t len = strlen(str);
+			reserve(len);
+
+			char* tmp = new char[_size - pos + 1];
+			strcpy(tmp, _str + pos);
+			strcpy(_str + pos, str);
+			strcpy(_str + len + pos, tmp);
+			delete[] tmp;
+			_size += len;
+			return *this;
+		}
+
+		void resize(size_t n,char str = '\0')
+		{
+			if (n < _size)
+			{
+			}
+			else
+			{
+				reserve(n - _size);
+				for (size_t i = _size; i < n; i++)
+				{
+					_str[i] = str;
+				}
+			}
+			_size = n;
+			_str[n] = '\0';
+		}
+
+		void erase(size_t pos = 0, size_t len = npos)
+		{
+			assert(pos < _size);
+
+			if (len >= _size - pos)
+			{
+				_str[pos] = '\0';
+				_size = pos;
+			}
+			else
+			{
+				size_t i = pos + len;
+				while (i <= _size)
+				{
+					_str[i - len] = _str[i];
+					++i;
+				}
+				_size -= len;
+			}
+		}
+
+		size_t find(char ch, size_t pos = 0)
+		{
+			assert(pos < _size);
+			for (size_t i = pos; i < _size; i++)
+			{
+				if (_str[i] == ch)
+					return i;
+			}
+			return npos;
+		}
+		
+		size_t find(const char* str, size_t pos = 0)
+		{
+			assert(pos < _size);
+			char* p = strstr(_str, str);
+			if (p == nullptr)
+			{
+				return npos;
+			}
+			return p - _str;
+		}
+
+		bool operator<(const string& str)
+		{
+			int ret = strcmp(_str, str._str);
+			return ret < 0;
+		}
+		bool operator==(const string& str)
+		{
+			int ret = strcmp(_str, str._str);
+			return ret == 0;
+		}
+		bool operator<=(const string& str)
+		{
+			return *this < str || *this == str;
+		}
+		bool operator>(const string& str)
+		{
+			return !(*this <= str);
+		}
+		bool operator>=(const string& str)
+		{
+			return !(*this < str);
+		}
+
+
+	private:
+		char* _str;
+		size_t _size;
+		size_t _capacity;
+
+		static size_t npos;
+	};
+
+	size_t string::npos = -1;
+
+	istream& operator>>(istream& in,string& str)
+	{
+		while (1)
+		{
+			//char ch;
+			//in >> ch;//系统实现的，遇到空白字符会结束输入(in >> ch)，所以这些空白字符不会进入ch中
+			char ch = in.get();//可以获取输入缓冲区内的所有字符，包括空白字符
+			if (ch == ' ' || ch == '\n')
+			{
+				break;
+			}
+			else
+			{
+				str += ch;
+			}
+		}
+		return in;
+	}
+
+	ostream& operator<<(ostream& out, const string& str)
+	{
+		for (size_t i = 0; i < str.size(); ++i)
+		{
+			out << str[i];
+		}
+		return out;
+	}
+
+	void string1_test()
+	{
+		string s1;
+		string s2("hello world");
+		s1 = s2;
+		cout << s1 <<endl <<  s2 <<endl <<  s1[4] << endl;
+
+		//三种遍历
+		//for循环
+		for (size_t i = 0; i < s2.size(); ++i)
+		{
+			cout << s2[i] << ' ';
+		}
+		cout << endl;
+
+		//迭代器
+		czx::iterator it2 = s2.begin();
+		while (it2 != s2.end())
+		{
+			(*it2)++;
+			cout << *it2 << ' ';
+			it2++;
+		}
+		cout << endl;
+
+		//
+		for (auto& s : s2)
+		{
+			s--;
+			cout << s << ' ';
+		}
+		cout << endl;
+	}
+
+	void string2_test()
+	{
+		string s1("hello world");
+		s1.push_back('!');
+		cout << s1 << endl;
+		string s2 = "i'm fine!";
+		s1.append("i'm fine!");
+		cout << s1 << endl;
+
+		s1.append(s2);
+		cout << s1 << endl;
+
+		string s3("h2");
+		s3 += "hello";
+		s3 += ' ';
+		s3 += "world";
+		cout << "s3:" << s3 << endl;
+	}
+
+	void string3_test()
+	{
+		string s1("world");
+		s1.insert(1, '!');
+		cout << s1 << endl;
+
+		s1.insert(0, "hello ");
+		cout << s1 << endl << endl;
+
+		s1.resize(16, 'x');
+		cout << s1 << endl;
+		cout << s1.size() << endl;
+		cout << s1.capacity() << endl << endl;
+
+		s1.resize(5);
+		cout << s1 << endl;
+		cout << s1.size() << endl;
+		cout << s1.capacity() << endl << endl;
+
+		s1.erase(2, 2);
+		cout << s1 << endl;
+
+		s1 = "hello";
+		s1.erase();
+		cout << s1 << endl;
+
+		s1 = "hello";
+		s1.erase(0, 4);
+		cout << s1 << endl;
+	}
+
+	void string4_test()
+	{
+		string s1("abcdefg");
+		cout << s1.find('d') << endl 
+			<< s1.find("efg") << endl 
+			<< s1.find("defgh") << endl;
+
+		string s2;
+		cin >> s1 >>s2;
+		cout << s1 << endl<< s2 << endl;
+	}
+}
+```
+
+```
+////限时实现string类的基本操作
+//namespace czx_1
+//{
+//	class string
+//	{
+//	public:
+//		string(const char* str = "")
+//		{
+//			_str = new char[strlen(str) + 1];
+//			strcpy(_str, str);
+//		}
+//
+//		//拷贝构造函数
+//		string(const string& s)
+//			:_str(nullptr)//防止tmp释放未知空间
+//		{
+//			string tmp(s._str);//构造一个临时对象
+//			swap(_str, tmp._str);//把临时对象吃干抹净，再卸磨杀驴
+//		}
+//
+//		string& operator=(string s)//被拷贝的string对象先拷贝构造一个临时对象，
+//		{							//用临时对象的内容替换掉原内容，然后退出时再将临时对象析构掉
+//			swap(_str, s._str);
+//			return *this;
+//		}
+//
+//		~string()
+//		{
+//			delete[] _str;
+//			_str = nullptr;
+//		}
+//	private:
+//		char* _str;
+//	};
+//
+//	
+//	void test()
+//	{
+//		string s1("hello");
+//		string s2(s1);
+//		string s3 = "world";
+//		s2 = s3;
+//	
+//	}
+//}
+```
