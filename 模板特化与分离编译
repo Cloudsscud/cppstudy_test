@@ -1,0 +1,203 @@
+// 类型模板参数
+template<class T>
+//template<typename T>
+class A
+{};
+
+// 模板类型参数+非模板类型参数  
+template<class T,int N> // 非模板类型参数是常量
+class B					// 注浮点数、自定义类型、字符串(string)不允许做非模板类型参数
+{
+public:
+	// ...
+private:
+	T _Array[N];
+};
+
+//template<class T>
+//int compare(const T& a,const T& b)
+//{
+//	return (a - b);
+//}
+//
+////函数模板的全特化  （特化：针对一种特殊类型进行特殊化处理的操作）
+//template<>
+//int compare<const char*>(const char* const& p1, const char* const& p2)
+//{
+//	return strcmp(p1, p2);
+//}
+
+// 模板参数的签名必须匹配 const T&=>T const&(T = const char*)
+template<class T>
+int compare(T& a,T& b)
+{
+	return (a - b);
+}
+template<>
+int compare<const char*>(const char* & p1, const char* & p2)
+{
+	return strcmp(p1, p2);
+}
+
+
+template<class T1,class T2>
+class test
+{
+public:
+	test()
+	{
+		cout << "原模板类:test<T1,T2>" << endl;
+	}
+private:
+};
+
+//偏特化 特化部分参数或对模板参数进一步限制(* 、 & 、const)
+template<class T2>
+class test<int,T2>
+{
+public:
+	test()
+	{
+		cout << "偏特化:test<int,T2>" << endl;
+	}
+private:
+};
+
+template<>
+class test<char,int>
+{
+public:
+	test()
+	{
+		cout << "全特化:test<char,int>" << endl;
+	}
+private:
+};
+
+template<>
+class test<char*,char*>
+{
+public:
+	test()
+	{
+		cout << "全特化:test<char*,char*>" << endl;
+	}
+private:
+};
+
+template<class T1,class T2>
+class test<T1*,T2*>
+{
+public:
+	test()
+	{
+		cout << "偏特化:test<T1*,T2*>" << endl;
+	}
+private:
+};
+
+template<class T1,class T2>
+class test<T1&,T2&>
+{
+public:
+	test()
+	{
+		cout << "偏特化:test<T1&,T2&>" << endl;
+	}
+private:
+};
+
+template<class T1,class T2>
+class test<const T1,const T2>
+{
+public:
+	test()
+	{
+		cout << "偏特化:test<const T1,const T2>" << endl;
+	}
+private:
+};
+
+int main()
+{
+	//B<int, 100> a; // 100大小
+	//B<int, 1000> b; // 1000大小
+
+	/*int a = 10;
+	int b = 20;
+	cout << compare(a, b) << endl;
+	const char* p1 = "hello";
+	const char* p2 = "horld";
+	cout << compare(p1, p2) << endl;*/
+
+	test<double, double> t0;	//原模板类:test<T1, T2>
+	test<int, int> t1;			//偏特化 : test<int, T2>
+	test<int, char> t2;			//偏特化 : test<int, T2>
+	test<char, int> t3;			//全特化 : test<char, int>
+	test<char, double> t4;		//原模板类 : test<T1, T2>
+	test<char*, double*> t5;	//偏特化 : test<T1*, T2*>
+	test<char*, char*> t6;		//全特化 : test<char*, char*>
+	test<char&, char&> t7;		//偏特化 : test<T1&, T2&>
+	test<const char*,const char*> t8;	//偏特化:test<T1*,T2*>
+	test<const int,const int> t9;		//偏特化 : test<const T1, const T2>
+
+	return 0;
+}
+
+
+
+"Func.h"
+#pragma once
+#include<iostream>
+
+// 分离编译：
+//void Func1();
+//
+//template<class T>
+//void Func2(const T& t);
+
+void Func1()
+{
+	std::cout << "Func1" << std::endl;
+}
+
+template<class T>
+void Func2(const T& t)
+{
+	std::cout << "Func2(const T& t)" << std::endl;
+}
+
+
+
+"Func.cpp"
+//#include"Func.h"
+//
+//// 分离编译：
+//void Func1()
+//{
+//	std::cout << "Func1" << std::endl;
+//}
+//
+//template<class T>
+//void Func2(const T& t)
+//{
+//	std::cout << "Func2(const T& t)" << std::endl;
+//}
+//
+////显式实例化 重复性操作多，不太好
+//template
+//void Func2<int>(const int& i);
+
+// 模板在分离编译时会有问题：可以对模板进行显式实例化
+// 或者不要进行分离编译：将模板都放在头文件中，不要让声明与定义分开
+
+#include"Func.h"
+int main()
+{
+	// 分离编译
+	//Func1();
+	//Func2(10); // 不能直接使用模板函数,需对模板函数进行显式实例化才可以用
+	///*template
+	//void Func2<int>(const int& i);*/
+	//Func2(10.2); // error
+}
