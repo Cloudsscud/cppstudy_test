@@ -1,0 +1,693 @@
+// 父类/基类
+class Person
+{
+public:
+	void Print()
+	{
+		cout << _name << endl;
+		cout << _age << endl;
+	}
+protected:
+	string _test = "test";
+private:
+	string _name = "Bryon";
+	int _age = 21;
+};
+
+// 派生类/子类
+// 父类的访问权限是在父类的访问限定符与继承方式之间取最小权限
+class Student :public Person // public继承方式
+//class Student :protected Person // protected继承方式 =>Print()不可见
+//class Student : Person // class的派生类的继承方式默认为private ;struct默认继承方式public
+{
+public:
+	void f()
+	{
+		cout << _sno << endl; // 本类的private/protected访问限定符对于当前类无影响
+		cout << _test << endl; //基类public继承后其protected内容可见
+		//cout << _name << endl; // 但基类的private成员变量永远不可访问/不可见(无论以什么方式继承)
+	}
+private:
+	string _sno; // 学号
+};
+
+class Teacher :public Person
+{
+public:
+
+private:
+	string _tno; // 工号
+};
+int main()
+{
+	//Student s;
+	//s.f();
+	//s.Print(); // protected及以下权限的继承，父类的public内容不可见
+
+	Person p;
+	Student s;
+	// 父类与子类的赋值规则(切割)
+	p = s;				// 子类对象中父类的那部分 可以赋值给父类对象
+	Person* ps = &s;	// 父类指针指向的是 子类中父类的那一部分空间
+	Person& ref = s;	// 引用的也是子类对象中父类的那一部分
+
+	//s = p;  // 反过来不可以，只能子类赋值给父类
+	//Student* ps = &p;
+	//Student& refs = p;
+	Student* pps = (Student*)ps;	// 这种情况下可以，但实质是子类对象指针直接的赋值
+						//ps 本来就指向的是子类对象的指针，只是类型（类型是解释指针的使用规则的）转成了父类的指针（这就导致了只能使用与父类相同的成员），
+						//那么我们只要把类型再转为子类，即可实现 所谓 父类指针赋值给子类指针（实质还是相同类型指针之间的赋值）
+	return 0;
+}
+
+class A
+{
+public:
+	void fun()
+	{
+		cout << "fun()" << endl;
+	}
+private:
+	int _num = 100;
+};
+class B : public A
+{
+public:
+	void fun(int i)
+	{
+		cout << "fun(int i)" << endl;
+	}
+private:
+	int _num = 999;
+};
+
+int main()
+{
+	B b;
+	//b.fun();		//error
+	b.fun(0);		// 只要子类与父类之间有同名的(对象或函数)，就会发生隐藏/重定义
+					//（父类同名的被隐藏起来了，参考一个函数内不同作用域的同名变量）
+	b.A::fun();		// 继承中只要同名，不论参数是否相同，都是隐藏/重定义
+					// 不能是重载，重载只能发生在相同作用域内
+	return 0;
+}
+
+// 父类
+class A
+{
+public:
+	A(string name = "peter")
+		:_name(name)
+	{
+		cout << "A()" << endl;
+	}
+	A(const A& a)
+		:_name(a._name)
+	{
+		cout << "A(const A& a)" << endl;
+	}
+	A& operator=(const A& a)
+	{
+		cout << "A& operator=(const A& a)" << endl;
+		if(this!=&a)
+			_name = a._name;
+		return *this;
+	}
+	~A()
+	{
+		cout << "~A()" << endl;
+	}
+private:
+	string _name;
+};
+
+// 子类
+class B : public A
+{
+public:
+	B(string name = "peter", int sno = 0)
+		//:A::_name(name)	//error
+		:A(name)			//子类构造函数中必须调用父类的构造函数，才能修改父类的成员
+		,_sno(sno)
+	{
+		cout << "B()" << endl;
+	}
+	B(const B& b)
+		//:_name(b._name)		//error
+		:A(b)					//子类的拷贝构造函数也必须调用父类的拷贝构造函数(此处有父子类之间引用的赋值)
+		,_sno(b._sno)
+	{
+		cout << "B(const B& b)" << endl;
+	}
+	B& operator=(const B& b)
+	{
+		cout << "B& operator=(const B& b)" << endl;
+		if(this!=&b)
+		{
+			A::operator=(b);		//子类的赋值拷贝构造需要显式父类域的拷贝构造函数(此处有父子类之间引用的赋值)
+			_sno = b._sno;
+		}
+		return *this;
+	}
+	~B()
+	{
+		//~A();			//error，(父子类的)析构函数最终会被编译器转为destruct，导致析构函数构成隐藏，进而引起循环，最终崩溃
+
+		//A::~A();		// 虽然此处显式调用了父类的析构函数，也确实执行了，但在执行后，仍会执行：子类析构 -> 父类析构
+						// 编译器会自动调用析构函数，以确保栈的顺序正确，不要自行调用
+		cout << "~B()" << endl;
+	}
+
+private:
+	int _sno;
+};
+
+// 对于父子类，析构函数不需要显式调用，其他的都需要显式调用父类相应的函数
+int main()
+{
+	//B b("kavin", 231);
+	B b1;
+	//B b2 = b1; // 拷贝构造
+	B b2;
+	b2 = b1;	//赋值拷贝构造
+	return 0;
+}
+
+ 注：友元不能继承下来，也就是说对父类友元但对子类不友元
+
+class A
+{
+public:
+	A(string name = "world")
+		:_name(name)
+	{
+		_count++;
+	}
+	string _name;
+	static int _count;
+};
+class B :public A
+{
+public:
+	B(string name = "peter")
+		:_name(name)
+	{}
+	string _name;
+};
+int A::_count = 0;	//继承时的父类、子类的静态成员变量是同一个
+
+int main()
+{
+	A a = "world";
+	B b = "jack";
+	a._count = 1;
+	b._count = 2;
+	return 0;
+}
+
+class Person
+{
+public:
+	string _name;
+};
+
+class Student : virtual public Person
+{
+protected:
+	int _sno;
+};
+
+class Teacher :virtual public Person	//虚拟继承需要对两个直接继承的父类都加关键字 virtual
+{
+protected:
+	int _num;
+};
+
+class Party :public Student, public Teacher
+{
+public:
+	string _course;
+};
+
+int main()
+{
+	//Party p;			// 多继承的特殊情况：菱形继承 缺点：数据冗余(都有同一个父类Person)、二义性
+	////p._name = "steve";	// 二义性(_name无法判断是哪个父类的)
+	//p.Student::_name = "steve"; // 借助显式声明哪个父类可以解决二义性，但无法解决数据冗余问题
+	//p.Teacher::_name = "kavin";
+
+	//解决方法：虚拟继承(virtual)
+	Party p;
+	p._name = "steve";
+	return 0;
+}
+
+class A
+{
+public:
+	int _a;
+};
+
+class B :virtual public A
+{
+public:
+	int _b;
+};
+
+class C :virtual public A
+{
+public:
+	int _c;
+};
+
+class D:public B,public C
+{
+public:
+	int _d;
+};
+
+//一般不要设计出菱形继承，多继承也应少用
+int main()
+{
+	D d;
+	cout << sizeof(d) << endl;	//菱形继承 20 D+(B+A)+(C+A)
+								//虚拟继承 x64 48  x32 24
+	d.B::_a = 1;
+	d.C::_a = 2;
+	d._b = 3;
+	d._c = 4;
+	d._d = 5;
+	return 0;
+}
+
+//多态条件： 1）父子类的虚函数构成重写（覆盖）（virtual声明，返回值类型、函数名、参数列表都一致）
+//			2）用父类类型的引用/指针调用虚函数（因为父子类的赋值规则）
+
+class Person
+{
+public:
+	virtual void BuyTickets()	// virtual声明的父类虚函数（多态的父类必须有）
+	{
+		cout << "全价" << endl;
+	}
+private:
+	string _name;
+};
+
+class Student : public Person
+{
+public :
+	virtual void BuyTickets()	// virtual声明的子类虚函数 与父类构成重写
+								// 注意：若子类无virtual声明，编译器也能识别出重写，但不规范
+	{							//如果子类与父类这个函数仅函数名相同，则构成隐藏/重定义
+		cout << "半价" << endl;
+	}
+private:
+	int _sno;
+};
+
+//(本来就因为想要使用多态，所以只能用父类类型来调虚函数，所以大多其实还是父类的虚函数)
+void Func(Person& p)
+{
+	p.BuyTickets();
+}
+
+int main()
+{
+	Person p;  //多态：虚表指针中有Person::BuyTickets(void)
+	Func(p);
+	
+	Student s;	//多态：继承下来的虚表指针中有Student::BuyTickets(void)，是两种虚函数
+	Func(s);
+	return 0;
+}
+
+//重写的特殊情况：协变（虚函数的返回类型不同，但是是（任意）父子类的指针或引用）
+class A {};
+class B :public A
+{};
+class Person
+{
+public:
+	virtual A* BuyTickets()	//Person* BuyTickets()
+	{
+		cout << "全价" << endl;
+		return nullptr;
+	}
+private:
+	string _name;
+};
+
+class Student : public Person
+{
+public :
+	virtual B* BuyTickets()	// Student* BuyTickets()
+	{
+		cout << "半价" << endl;
+		return nullptr;
+	}
+private:
+	int _sno;
+};
+
+// Func构成重载(一个作用域内，函数名相同但参数类型不同)，
+// 而BuyTickets()构成多态
+void Func(Person& people)
+{
+	people.BuyTickets();
+}
+
+void Func(Person* people)
+{
+	people->BuyTickets();
+}
+
+int main()
+{
+	Person p;
+	Student s;
+
+	Func(p);
+	Func(s);
+	
+	Func(&p);
+	Func(&s);
+	return 0;
+}
+
+class Person
+{
+public:
+	virtual ~Person()
+	{
+		cout << "~Person()" << endl;
+	}
+};
+class Student :public Person
+{
+public:
+	virtual ~Student()		//析构函数的函数名相同，都是destructor，使用virtual变为虚函数，构成重写
+	{						//进而构成多态，那么实际指向的是哪个类，就调用哪个类的析构函数
+		cout << "~Student()" << endl;
+	}
+};
+int main()
+{
+	// 此种场景下对析构函数是否是虚函数有要求
+	Person* p = new Person;
+	delete p;
+	Person* s = new Student;	// 父子类的析构函数不构成多态时，只能依据指针类型调用对应析构函数
+	delete s;					// 那么此处调用父类的析构函数，导致子类数据泄露
+	return 0;
+}
+
+class A // final // 修饰类不能被继承
+{
+public:
+	virtual void func(int val = 1) //final // 修饰虚函数，不能被重写
+	{
+		cout << "A->" << val << endl;
+	}
+	virtual void test() //(2) A* this = b
+	{
+		func(); //（3） 但func构成多态，调用的是实际指向类(B)的虚函数
+	}
+};
+class B :public A
+{
+public:
+	void func(int val = 0) override // 检测子类的虚函数是否被父类虚函数重写
+						// (4) 继承实际上会把父类的函数声明保留下来，只替换函数体，导致子类的参数缺省值是无意义的
+	{					// 所以实际上此处是 virtual void func(int val = 1){...}
+		cout << "B->" << val << endl;	//(5)输出 "B->1"
+	}
+};
+
+int main()
+{
+	B* b = new B;
+	b->test(); //(1) b->test(b)
+	return 0;
+}
+
+ 重载(一个作用域内，函数名相同但参数类型不同)
+ 重写（覆盖）（在父子类中，virtual声明，返回值类型、函数名、参数列表都一致（特殊情况：协变））
+ 重定义（隐藏） （父子类中，只要同名，且这个同名函数不是重写(对同名变量无要求)，就是重定义）
+
+// 抽象类/接口类
+class car
+{
+public:
+	virtual void func() = 0; //纯虚函数
+};
+class Benz:public car
+{
+public :
+	virtual void func()
+	{}
+};
+
+//纯虚函数作用： 1）强制要求派生类重写纯虚函数，否则无法实例化
+//				2）表示一个抽象的类型
+int main()
+{
+	//car car; //抽象类不能实例化出对象
+	//Benz b;	//仅继承抽象类，但未重写纯虚函数，则也不能实例化
+				//继承后，派生类也有了这个纯虚函数
+	Benz b;
+	return 0;
+}
+
+构成多态：实际引用/指向的对象是哪个类，就调用哪个类的虚函数。
+ 
+不构成多态：如果函数不是虚函数，或者调用函数时的（引用/指针）类型是哪个类，
+             就调用哪个类编译时确定的函数（非虚函数或基于编译时类型绑定的函数）。
+			
+ why? 原因：
+ 1. 对于含虚函数的类，每个类都有自己的虚表（vtable），存储了该类的虚函数地址，末尾用nullptr注明。
+ 2. 多态调用时，通过实际对象的虚表指针（__vfptr）找到对应的虚表，动态绑定到实际对象的函数。
+ 3. 若不构成多态，调用非虚函数时，直接根据编译时的类型决定调用的函数，虚表机制不会被使用。
+
+ 大致流程：虚函数在编译时会将自身地址存一份到虚表里，派生类的虚表有一部分是从基类继承下来的，另一部分是自身的虚函数存的
+ 如果派生类重写了基类的虚函数，则重写后的虚函数会用自身地址，把从基类继承的地址给 覆盖 掉
+ 未重写的不变，新加的虚函数按声明顺序将新的虚函数指针加入虚表中
+
+ 虚函数和普通函数一样，都存在代码段里，只是指向虚函数的指针会存一份到虚表里
+ 存在对象中的实际是虚表指针，不是虚表
+ 虚表在VS条件下存在代码段(常量区(C语言))里
+ 不能是栈里。假如是栈，那么同类型的几个对象的虚表应该是不同的，但所有同类型的对象共用同一张虚表（虚函数指针都一样）
+
+class Person
+{
+public:
+	virtual void BuyTickets()
+	{
+		cout << "全价" << endl;
+	}
+	void test() {};
+private:
+	string _name;
+};
+
+class Student : public Person
+{
+public:
+	virtual void BuyTickets()
+	{
+		cout << "半价" << endl;
+	}
+private:
+	int _sno;
+};
+
+void Func(Person& p)
+{
+	p.BuyTickets();
+}
+
+// 检验虚函数、虚表存储的位置
+void func()
+{
+	Person base;
+	printf("vptptr:%p\n", *(int*)&base); //只取含虚函数的类对象的前四个字节:即虚表指针
+
+	int i = 0;
+	int* pi = &i;// 栈
+	int* p = new int;// 堆
+	char* c = "hello";// 代码段常量
+	printf("栈变量:%p\n", pi);
+	printf("堆变量:%p\n", p);
+	printf("代码段常量:%p\n", c);
+	printf("类内虚函数函数地址: %p\n", &Person::BuyTickets);
+	printf("类内普通函数函数地址: %p\n", &Person::test);// 类内函数想取地址必须先&
+	printf("普通函数函数地址: %p\n", func);// 普通函数名即地址
+
+}
+void f(int)
+{
+
+}
+void f(double)
+{
+
+}
+void test2()
+{
+	int i = 0;
+	double d = 1.1;
+	//静态绑定： 静态的多态   （静态：编译时确定函数地址）
+	f(i);
+	f(d);
+
+	// 动态绑定： 动态的多态(多态一般默认认为是动态绑定)  (动态：运行时在虚表中找虚函数地址)
+	Person* p = new Person;
+	p->BuyTickets();
+	p = new Student;
+	p->BuyTickets();
+}
+
+int main()
+{
+	func();
+	return 0;
+}
+
+单继承的虚表
+class A
+{
+public:
+	virtual void func1() { cout << "A::func1" << endl; }
+	virtual void func2() { cout << "A::func2" << endl; }
+};
+
+class B : public A
+{
+public:
+	virtual void func1() { cout << "B::func1" << endl; }
+	virtual void func3() { cout << "B::func3" << endl; }
+	virtual void func4() { cout << "B::func4" << endl; }
+};
+
+typedef void(*VF_PTR)(); // 函数指针typedef
+
+// 输出虚表中的每个虚函数地址与来源
+void PrintVFTable(VF_PTR* vftable)
+{
+	for (int i = 0; vftable[i] != nullptr; ++i)
+	{
+		printf("vftable[%d]:%p ->", i, vftable[i]);
+		VF_PTR f = vftable[i];
+		f();
+	}
+	cout << endl;
+}
+int main()
+{
+	A a;
+	B b;
+	PrintVFTable((VF_PTR*)*(int*)&a);// 取前四个字节存的虚表指针（本质就是一个虚函数指针数组）
+	PrintVFTable((VF_PTR*)*(int*)&b);
+	return 0;
+}
+
+ 多继承的虚表
+class A1
+{
+public:
+	virtual void func1() { cout << "A1::func1" << endl; }
+	virtual void func2() { cout << "A1::func2" << endl; }
+private:
+	int a1; // 4+4 = 8
+};
+
+class A2
+{
+public:
+	virtual void func1() { cout << "A2::func1" << endl; }
+	virtual void func2() { cout << "A2::func3" << endl; }
+private:
+	int a2; // 4+4 = 8
+};
+
+class B : public A1,public A2
+{
+public:
+	virtual void func1() { cout << "B::func1" << endl; }
+	virtual void func3() { cout << "B::func3" << endl; }
+private:
+	int b; // 8+8+4 继承了两个父类的虚表，子类不再建立新的虚表
+};
+
+typedef void(*VF_PTR)(); // 函数指针typedef
+
+// 输出虚表中的每个虚函数地址与来源
+void PrintVFTable(VF_PTR* vftable)
+{
+	for (int i = 0; vftable[i] != nullptr; ++i)
+	{
+		printf("vftable[%d]:%p ->", i, vftable[i]);
+		VF_PTR f = vftable[i];
+		f();
+	}
+	cout << endl;
+}
+
+int main()
+{
+	cout << sizeof(A1) << endl;
+	cout << sizeof(A2) << endl;
+	cout << sizeof(B) << endl;
+	B b;
+	//第一张虚表
+	PrintVFTable((VF_PTR*)*(int*)&b);
+	cout << endl;
+	// 第二张虚表
+	PrintVFTable((VF_PTR*)*(int*)((char*)&b + sizeof(A1)));// 先向后移到第二张虚表的开头，然后取前四个字节
+	// 说明多继承中子类按照继承顺序先后继承虚表，子类重写的虚函数会在两张虚表都修改，而自己的虚函数存入第一张虚表里
+	return 0;
+}
+
+虚继承的虚基表区域验证
+class A
+{
+public:
+	int _a;
+};
+
+class B:virtual public A
+{
+public:
+	int _b;
+};
+
+class C:virtual public A
+{
+public:
+	int _c;
+};
+
+class D: public B ,public C
+{
+public:
+	int _d;
+};
+
+int main()
+{
+	D d;
+	d.B::_a = 1;
+	d.C::_a = 2;
+	d._a = 6;
+
+	d._b = 3;
+	d._c = 4;
+	d._d = 5;
+
+	printf("虚基表:%p\n", *(int*)&d); // 虚基表存在代码段中
+	static int p = 1;
+	printf("数据段：%p\n", p);
+	char* c = "hello";
+	printf("代码段(常量区):%p\n", c);
+
+	return 0;
+}
