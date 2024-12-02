@@ -1,0 +1,486 @@
+#include<iostream>
+#include<list>
+#include<assert.h>
+using namespace std;
+
+// list
+void print_list(const list<int> l)
+{
+	list<int>::const_iterator cit = l.begin();
+	while (cit != l.end())
+	{
+		cout << *cit << ' ';
+		++cit;
+	}
+	cout << endl;
+}
+
+void test1_list()
+{
+	list<int> l;
+	l.push_back(1);
+	l.push_back(2);
+	l.push_back(3);
+	l.push_back(4);
+	l.push_front(0);
+	l.push_front(-1);
+	list<int>::iterator it = l.begin();
+	while (it != l.end())
+	{
+		cout << *it << ' ';
+		++it;
+	}
+	cout << endl;
+
+	l.pop_back();
+	l.pop_front();
+
+	for (auto e : l)
+	{
+		cout << e << ' ';
+	}
+	cout << endl;
+
+	list<int>::reverse_iterator rit = l.rbegin();
+	while (rit != l.rend())
+	{
+		cout << *rit << ' ';
+		++rit;
+	}
+	cout << endl;
+
+	print_list(l);
+
+}
+
+void test2_list()
+{
+	list<int> lt;
+	lt.push_back(1);
+	lt.push_back(2);
+	lt.push_back(3);
+	lt.push_back(4);
+	lt.push_back(5);
+
+	list<int>::iterator pos = find(lt.begin(),lt.end(),3);
+	if(pos != lt.end())
+	{
+		lt.insert(pos, 30);	//在pos前面插入30
+							//list的插入不会释放原本空间，所以插入后迭代器不会失效
+							//vector的插入会释放原本空间，所以插入后迭代器失效
+
+		lt.erase(pos);//erase之后，pos指向的空间被释放，所以迭代器pos失效  (但返回下一个位置)
+	}
+	list<int>::iterator it = lt.begin();	//1
+	lt.insert(it, 2);
+	it++;	//2
+	it++;	//30
+	it++;	//4
+	lt.insert(it, 2);
+	print_list(lt);
+
+}
+
+#include"list.h"
+
+int main()
+{
+	//test1_list();
+	//test2_list();
+
+	//czx::test_list1();
+	//czx::test_list2();
+	//czx::test_list3();
+	czx::test_list4();
+	return 0;
+}
+
+
+"list.h"
+#pragma once
+namespace czx
+{
+	template<class T>
+	struct __list_node
+	{
+		__list_node<T>* _prev;
+		__list_node<T>* _next;
+		T _data;
+
+		__list_node(const T& val = T())
+			:_data(val)
+			, _next(nullptr)
+			, _prev(nullptr)
+		{}
+	};
+
+	//template<class T>
+	//struct __list_iterator
+	//{
+	//	typedef __list_node<T> Node;
+
+	//	Node* _node;
+
+	//	__list_iterator(Node* node)
+	//		:_node(node)
+	//	{}
+
+	//	T& operator*()
+	//	{
+	//		return _node->_data;
+	//	}
+
+	//	T* operator->()
+	//	{
+	//		return &_node->_data;
+	//		// 如果T是自定义类型，此处返回T结构体的指针,这样就可以访问->访问T类型的成员变量
+	//	}
+
+	//	__list_iterator<T>& operator++()
+	//	{
+	//		_node = _node->_next;
+	//		return *this;
+	//	}
+	//	
+	//	__list_iterator<T>& operator++(int)
+	//	{
+	//		__list_iterator<T> tmp(*this);
+	//		_node = _node->_next;
+	//		return tmp;
+	//	}
+	//	
+	//	__list_iterator<T>& operator--()
+	//	{
+	//		_node = _node->_prev;
+	//		return *this;
+	//	}
+	//	
+	//	__list_iterator<T>& operator--(int)
+	//	{
+	//		__list_iterator<T> tmp(*this);
+	//		_node = _node->_prev;
+	//		return tmp;
+	//	}
+
+	//	bool operator!=(const __list_iterator<T>& it)const
+	//	{
+	//		return _node != it._node;
+	//	}
+	//};
+	
+	
+	template<class T,class Ref, class Ptr>
+	struct __list_iterator
+	{
+		typedef __list_node<T> Node;
+		typedef __list_iterator<T, Ref, Ptr> Self;
+
+		Node* _node;
+
+		__list_iterator(Node* node)
+			:_node(node)
+		{}
+
+		Ref operator*()// 返回第二类参数,对应到list类内的实际参数就是T& 或者const T&
+		{
+			return _node->_data;
+		}
+
+		Ptr operator->()// 第三类参数就是T* 或者const T*
+		{
+			return &_node->_data;
+			// 如果T是自定义类型，此处返回T结构体的指针,这样就可以访问->访问T类型的成员变量
+		}
+
+		Self& operator++()
+		{
+			_node = _node->_next;
+			return *this;
+		}
+		
+		Self operator++(int)
+		{
+			Self tmp(*this);
+			_node = _node->_next;
+			return tmp;
+		}
+		
+		Self& operator--()
+		{
+			_node = _node->_prev;
+			return *this;
+		}
+		
+		Self operator--(int)
+		{
+			Self tmp(*this);
+			_node = _node->_prev;
+			return tmp;
+		}
+
+		bool operator!=(const Self& it)
+		{
+			return _node != it._node;
+		}
+		
+		bool operator==(const Self& it)
+		{
+			return _node == it._node;
+		}
+	};
+
+	template<class T>
+	class list
+	{
+		typedef __list_node<T> Node;
+	public:
+		typedef __list_iterator<T, T&, T*> iterator;
+		typedef __list_iterator<T,const T&,const T*> const_iterator;
+
+		//带头双向循环链表
+		list()
+		{
+			_head = new Node;
+			_head->_next = _head;
+			_head->_prev = _head;
+		}
+
+		list(const list<T>& lt)
+		{
+			_head = new Node;
+			_head->_next = _head;
+			_head->_prev = _head;
+			/*const_iterator it = lt.begin();
+			while(it != lt.end())
+			{
+				push_back(*it);
+				++it;
+			}*/
+			for (auto e : lt)
+			{
+				push_back(e);
+			}
+		}
+
+		/*list<T>& operator=(const list<T>& lt)
+		{
+			assert(lt._head != _head);
+			clear();
+			for (auto e : lt)
+			{
+				push_back(e);
+			}
+			return *this;
+		}*/
+		
+		list<T>& operator=(list<T> lt)
+		{
+			swap(_head, lt._head);//将头结点互换,释放不要的链表
+			return *this;
+		}
+
+
+		~list()
+		{
+			clear();
+			delete _head;
+			_head = nullptr;
+		}
+
+		void clear()// 清理数据(除头节点)
+		{
+			iterator it = begin();
+			while (it != end())
+			{
+				erase(it++);
+			}
+		}
+
+		iterator begin()
+		{
+			return iterator(_head->_next);
+		}
+		
+		iterator end()
+		{
+			return iterator(_head);
+		}
+		
+		const_iterator begin()const
+		{
+			return const_iterator(_head->_next);
+		}
+		
+		const_iterator end()const
+		{
+			return const_iterator(_head);
+		}
+
+		void push_back(const T& val)
+		{
+			insert(end(), val);
+		}
+
+		void pop_back()
+		{
+			erase(--end());
+		}
+
+		void push_front(const T& val)
+		{
+			insert(begin(),val);
+		}
+
+		void pop_front()
+		{
+			erase(begin());
+		}
+
+		iterator insert(iterator pos, const T& val)
+		{
+			Node* cur = pos._node;
+			Node* prev = pos._node->_prev;
+			Node* newnode = new Node(val);
+
+			prev->_next = newnode;
+			newnode->_prev = prev;
+			newnode->_next = cur;
+			cur->_prev = newnode;
+
+			return iterator(newnode);
+		}
+
+		iterator erase(iterator pos)
+		{
+			assert(pos != end());
+			Node* prev = pos._node->_prev;
+			Node* next = pos._node->_next;
+			
+			prev->_next = next;
+			next->_prev = prev;
+
+			delete pos._node;
+			return iterator(next);
+		}
+
+	private:
+		Node* _head;
+	};
+
+	void test_list1()
+	{
+		czx::list<int> l1;
+		l1.push_back(1);
+		l1.push_back(2);
+		l1.push_back(3);
+		l1.push_back(4);
+
+		list<int>::iterator it = l1.begin();
+		while (it != l1.end())
+		{
+			cout << *it << ' ';
+			++it;
+		}
+		cout << endl;
+	}
+
+	struct Date
+	{
+		int _year = 0;
+		int _month = 1;
+		int _day = 1;
+	};
+
+	void test_list2()
+	{
+		list<Date> lt;
+		lt.push_back(Date());
+		lt.push_back(Date());
+		lt.push_back(Date());
+		lt.push_back(Date());
+
+		list<Date>::iterator it = lt.begin();
+		while (it != lt.end())
+		{
+			//cout << *it << ' ';
+			/*cout << (*it)._year << " "
+				<< (*it)._month << " "
+				<< (*it)._day << endl;*/
+			cout << it->_year << " " << it->_month << " " << it->_day << endl;
+			//	其实是(it->_node)->_year 编译器优化后提高可读性
+			++it;
+			//it++;
+		}
+	}
+
+
+	void print_list(const list<int>& lt)//想要调用，该函数必须放在使用之前
+	{
+		//list<int>::iterator it = lt.begin();
+		//while (it != lt.end())
+		//{
+		//	*it = 1;//竟然可以修改const 对象,不符合要求
+		//	cout << *it << ' ';
+		//	++it;
+		//}
+
+		list<int>::const_iterator cit = lt.begin();
+		while (cit != lt.end())
+		{
+			//*cit = 1;//不能修改了
+			cout << *cit << ' ';
+			++cit;
+		}
+		cout << endl;
+	}
+
+	void test_list3()
+	{
+		czx::list<int> l1;
+		l1.push_back(1);
+		l1.push_back(2);
+		l1.push_back(3);
+		l1.push_back(4);
+		l1.pop_back();
+		l1.pop_front();
+		l1.push_front(0);
+
+		list<int>::iterator it = l1.begin();
+		while (it != l1.end())
+		{
+			cout << *it << ' ';
+			++it;
+		}
+		cout << endl;
+
+		l1.clear();
+
+		l1.push_back(1);
+		l1.push_back(2);
+		l1.push_back(3);
+
+		print_list(l1);
+	}
+
+	
+	void test_list4()
+	{
+		czx::list<int> l1;
+		l1.push_back(1);
+		l1.push_back(2);
+		l1.push_back(3);
+		l1.push_back(4);
+		print_list(l1);
+
+		list<int> l2(l1);
+		print_list(l2);
+		l2.pop_back();
+		l2.pop_front();
+		print_list(l2);
+
+		l2 = l1;
+		print_list(l2);
+		l2.pop_back();
+		print_list(l2);
+	}
+}
